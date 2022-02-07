@@ -1,0 +1,10 @@
+/src/test/**
+
+*.iml
+/.idea
+/.gradle
+/build
+/target
+
+/tmp
+/log
