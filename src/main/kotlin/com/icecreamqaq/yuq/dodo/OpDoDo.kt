@@ -4,6 +4,8 @@ import com.IceCreamQAQ.Yu.toJSONObject
 import com.IceCreamQAQ.Yu.toJSONString
 import com.IceCreamQAQ.Yu.toObject
 import com.alibaba.fastjson.JSONObject
+import com.icecreamqaq.yuq.dodo.message.TextImpl
+import com.icecreamqaq.yuq.message.Message
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -199,6 +201,11 @@ class OpDoDo(
         val referencedMessageId: Long?
     )
 
+    private lateinit var messageListener: (MessageEventRecv, IMessageBody, PushEventRecv) -> Unit
+    fun onMessage(body: (MessageEventRecv, IMessageBody, PushEventRecv) -> Unit) {
+        messageListener = body
+    }
+
     inner class WsListener : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             println("connect success.")
@@ -222,10 +229,7 @@ class OpDoDo(
                             else -> error("遇到无法解析的 MessageType: ${body.messageType}！")
                         }
                     )
-                    println(event)
-                    println(body)
-                    if (body.referencedMessageId != null) recallMessage(body.messageId)
-                    sendMessageToChannel(body.channelId,1,"测试回复",body.messageId)
+                    messageListener(body, messageBody,event)
                 }
             }
         }
