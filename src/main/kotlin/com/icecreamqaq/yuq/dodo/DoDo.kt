@@ -7,8 +7,11 @@ import com.IceCreamQAQ.Yu.event.EventBus
 import com.IceCreamQAQ.Yu.util.Web
 import com.icecreamqaq.yuq.*
 import com.icecreamqaq.yuq.dodo.entity.GuildImpl
+import com.icecreamqaq.yuq.dodo.message.DoDoMessageSource
 import com.icecreamqaq.yuq.entity.*
 import com.icecreamqaq.yuq.message.MessageItemFactory
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class DoDo : ApplicationService, YuQVersion, YuQ, User {
@@ -76,6 +79,18 @@ class DoDo : ApplicationService, YuQVersion, YuQ, User {
 
     override fun start() {
         context.injectBean(internalBot)
+        opDoDo.onMessage { e, b, ee ->
+            GlobalScope.launch {
+                val g = getOrNewGuild(e.islandId)
+                val c = g.getOrNewChannel(e.channelId)
+                val m = g.getOrNewMember(e.dodoId)
+                val message = b.toMessage()
+                message.source = DoDoMessageSource(e.messageId, m.id, ee.timestamp)
+                message.path = message.body
+                message.sourceMessage = b
+                internalBot.receiveGuildMessage(c, m, message)
+            }
+        }
         op.ws()
     }
 
