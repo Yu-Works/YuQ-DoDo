@@ -1,6 +1,12 @@
 package com.icecreamqaq.yuq.dodo.entity
 
 import com.icecreamqaq.yuq.YuQ
+import com.icecreamqaq.yuq.dodo.OpDoDo
+import com.icecreamqaq.yuq.dodo.dodo
+import com.icecreamqaq.yuq.dodo.message.DoDoMessageSource
+import com.icecreamqaq.yuq.dodo.message.DoDoMultiMessageSource
+import com.icecreamqaq.yuq.dodo.message.send
+import com.icecreamqaq.yuq.dodo.message.toLocal
 import com.icecreamqaq.yuq.dodo.opDoDo
 import com.icecreamqaq.yuq.entity.Channel
 import com.icecreamqaq.yuq.entity.Guild
@@ -87,7 +93,21 @@ class ChannelImpl(
 
 
     override fun sendMessage(message: Message): MessageSource {
-        TODO("Not yet implemented")
+        return message.send(this, null) {
+            val reqs = message.toLocal().map {
+                OpDoDo.SendMessageReq(
+                    channelId = id,
+                    messageType = it.first,
+                    messageBody = it.second
+                )
+            }
+            message.reply?.let { reqs.last().referencedMessageId = (it as DoDoMessageSource).realId }
+            DoDoMultiMessageSource(
+                reqs.map { opDoDo.sendMessageToChannel(it).messageId }.toTypedArray(),
+                dodo.botId,
+                System.currentTimeMillis()
+            )
+        }
     }
 
     override fun sendFile(file: File) {
