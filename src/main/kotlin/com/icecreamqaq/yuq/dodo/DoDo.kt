@@ -3,12 +3,10 @@ package com.icecreamqaq.yuq.dodo
 import com.IceCreamQAQ.Yu.`as`.ApplicationService
 import com.IceCreamQAQ.Yu.annotation.Config
 import com.IceCreamQAQ.Yu.util.Web
+import com.icecreamqaq.yuq.GuildList
 import com.icecreamqaq.yuq.YuQ
 import com.icecreamqaq.yuq.YuQVersion
-import com.icecreamqaq.yuq.entity.Friend
-import com.icecreamqaq.yuq.entity.Group
-import com.icecreamqaq.yuq.entity.User
-import com.icecreamqaq.yuq.entity.UserListImpl
+import com.icecreamqaq.yuq.entity.*
 import com.icecreamqaq.yuq.message.MessageItemFactory
 import javax.inject.Inject
 
@@ -70,6 +68,7 @@ class DoDo : ApplicationService, YuQVersion, YuQ {
         get() = TODO("Not yet implemented")
     override val friends = UserListImpl<Friend>()
     override val groups = UserListImpl<Group>()
+    override var guilds = UserListImpl<Guild>()
     override val messageItemFactory: MessageItemFactory
         get() = TODO("Not yet implemented")
 

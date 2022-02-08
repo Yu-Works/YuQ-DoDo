@@ -12,5 +12,5 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    api("com.IceCreamQAQ:YuQ:0.1.0.0-DEV25")
+    api("com.IceCreamQAQ:YuQ:0.1.0.0-DEV26")
 }
