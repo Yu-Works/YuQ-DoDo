@@ -81,8 +81,8 @@ class OpDoDo(
         postV1(path, data).getJSONArray("data").toJavaList(T::class.java)
 
     data class BotInfo(
-        val clientId: String,
-        val dodoId: String,
+        val clientId: Long,
+        val dodoId: Long,
         val nickName: String,
         val avatarUrl: String
     )
@@ -90,7 +90,7 @@ class OpDoDo(
     fun botInfo(): BotInfo = readV1("bot/info")
 
     data class Island(
-        val islandId: String,
+        val islandId: Long,
         val isLandName: String,
         val coverUrl: String,
         val defaultChannelId: String,
@@ -100,10 +100,11 @@ class OpDoDo(
     fun guildList(): List<Island> = readArrayV1("island/list")
 
     data class OnlyIslandIdReq(val islandId: Long)
+    data class OnlyChannelIdReq(val channelId: Long)
 
-    fun onlyChannelId(id: Long) = OnlyIslandIdReq(id)
+    fun onlyGuildId(id: Long) = OnlyIslandIdReq(id)
 
-    fun guildInfo(id: Long): Island = readV1("island/info", onlyChannelId(id))
+    fun guildInfo(id: Long): Island = readV1("island/info", onlyGuildId(id))
 
     data class Channel(
         val channelId: Long,
@@ -111,10 +112,28 @@ class OpDoDo(
         val defaultFlag: Int
     )
 
-    fun channelList(id: Long): List<Channel> = readArrayV1("channel/list", onlyChannelId(id))
+    fun channelList(id: Long): List<Channel> = readArrayV1("channel/list", onlyGuildId(id))
+    fun channelInfo(id: Long): Channel = readV1("channel/info", OnlyChannelIdReq(id))
+
+    data class MemberInfoReq(
+        val islandId: Long,
+        val dodoId: Long
+    )
+
+    data class MemberInfo(
+        val islandId: Long,
+        val dodoId: Long,
+        val nickName: String,
+        val avatarUrl: String,
+        val sex: Int
+    )
+
+    fun memberInfo(guild: Long, member: Long) = readV1<MemberInfo>("member/info", MemberInfoReq(guild, member))
 
     interface IMessageBody
+
     data class TextMessageBody(val content: String) : IMessageBody
+
     data class ImageMessageBody(
         val url: String,
         val width: Int?,
@@ -130,20 +149,24 @@ class OpDoDo(
     ) : IMessageBody
 
     data class SendMessageReq(
-        val channelId: String,
+        val channelId: Long,
         val messageType: Int,
         val messageBody: IMessageBody,
-
-        val referencedMessageId: Long?
+        var referencedMessageId: Long? = null
     )
 
     data class OnlyMessageId(val messageId: Long)
 
-    fun sendMessageToChannel(channelId: Long, type: Int, message: String, referer: Long? = null): OnlyMessageId =
+    fun sendMessageToChannel(sendMessageReq: SendMessageReq): OnlyMessageId =
         readV1(
             "channel/message/send",
+            sendMessageReq
+        )
+
+    fun sendMessageToChannel(channelId: Long, type: Int, message: String, referer: Long? = null): OnlyMessageId =
+        sendMessageToChannel(
             SendMessageReq(
-                channelId.toString(),
+                channelId,
                 type,
                 TextMessageBody(message),
                 referer
@@ -187,7 +210,6 @@ class OpDoDo(
 
         override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
             val recv = bytes.utf8().toObject<Recv>()
-            println(bytes.utf8())
             if (recv.type == 0) {
                 val event = recv.data.toJavaObject(PushEventRecv::class.java)
                 if (event.eventType == 2001) {
@@ -225,4 +247,6 @@ class OpDoDo(
         close = true
         wsSession.close(0, "")
     }
+
+
 }
