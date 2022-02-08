@@ -14,7 +14,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class DoDo : ApplicationService, YuQVersion, YuQ, User {
+class DoDo : YuQVersion, ApplicationService, YuQ, User {
+
+    override fun platform() = "DoDo"
+    override fun runtimeName() = "YuQ-DoDo"
+    override fun runtimeVersion() = "0.1.0.0-DEV1"
 
     @Config("YuQ.DoDo.clientId")
     lateinit var clientId: String
@@ -43,7 +47,7 @@ class DoDo : ApplicationService, YuQVersion, YuQ, User {
     lateinit var context: YuContext
 
     @Inject
-    lateinit var eventBus:EventBus
+    lateinit var eventBus: EventBus
 
 
     override fun init() {
@@ -97,11 +101,6 @@ class DoDo : ApplicationService, YuQVersion, YuQ, User {
     override fun stop() {
         op.close()
     }
-
-
-    override fun platform() = "DoDo"
-    override fun runtimeName() = "YuQ-DoDo"
-    override fun runtimeVersion() = "0.1.0-DEV"
 
 
     override var guilds = UserListImpl<GuildImpl>()
