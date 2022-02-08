@@ -132,23 +132,33 @@ class OpDoDo(
 
     fun memberInfo(guild: Long, member: Long) = readV1<MemberInfo>("member/info", MemberInfoReq(guild, member))
 
-    interface IMessageBody
+    interface IMessageBody {
+        fun toMessage(): Message
+    }
 
-    data class TextMessageBody(val content: String) : IMessageBody
+    data class TextMessageBody(val content: String) : IMessageBody {
+        override fun toMessage() = TextImpl(content).toMessage()
+    }
 
     data class ImageMessageBody(
         val url: String,
         val width: Int?,
         val height: Int?,
         val isOriginal: Int?
-    ) : IMessageBody
+    ) : IMessageBody {
+        override fun toMessage() = TODO()
+    }
 
     data class VideoMessageBody(
         val url: String,
         val coverUrl: String?,
         val duration: Long?,
         val size: Long?
-    ) : IMessageBody
+    ) : IMessageBody {
+        override fun toMessage(): Message {
+            TODO("Not yet implemented")
+        }
+    }
 
     data class SendMessageReq(
         val channelId: Long,
