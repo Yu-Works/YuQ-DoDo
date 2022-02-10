@@ -9,7 +9,10 @@ import com.icecreamqaq.yuq.*
 import com.icecreamqaq.yuq.dodo.entity.GuildImpl
 import com.icecreamqaq.yuq.dodo.message.DoDoMessageSource
 import com.icecreamqaq.yuq.entity.*
+import com.icecreamqaq.yuq.message.MessageItem
 import com.icecreamqaq.yuq.message.MessageItemFactory
+import com.icecreamqaq.yuq.message.Text
+import com.icecreamqaq.yuq.message.Text.Companion.toText
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -66,7 +69,7 @@ class DoDo : YuQVersion, ApplicationService, YuQ, User {
             }
             println(guildInfo(199899))
         }
-//        refreshGuilds()
+        refreshGuilds()
     }
 
     private fun getOrNewGuild(id: Long): GuildImpl =
@@ -90,7 +93,18 @@ class DoDo : YuQVersion, ApplicationService, YuQ, User {
                 val m = g.getOrNewMember(e.dodoId)
                 val message = b.toMessage()
                 message.source = DoDoMessageSource(e.messageId, m.id, ee.timestamp)
-                message.path = message.body
+                val path = ArrayList<MessageItem>()
+                message.body.forEach { item ->
+                    when (item) {
+                        is Text -> {
+                            val s = item.text.trim().split(" ")
+                            s.forEach { c -> c.trim().let { if (it.isNotEmpty()) path.add(it.toText()) } }
+                            null
+                        }
+                        else -> item
+                    }?.let { path.add(it) }
+                }
+                message.path = path
                 message.sourceMessage = b
                 internalBot.receiveGuildMessage(c, m, message)
             }

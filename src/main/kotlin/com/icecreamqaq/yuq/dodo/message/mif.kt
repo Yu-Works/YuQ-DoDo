@@ -10,6 +10,8 @@ class DoDoMIF:MessageItemFactory {
 
     override fun text(text: String) = TextImpl(text)
 
+    override fun imageById(id: String) = ImageRecv(id)
+
     override fun at(member: Member): At {
         TODO("Not yet implemented")
     }
@@ -27,10 +29,6 @@ class DoDoMIF:MessageItemFactory {
     }
 
     override fun imageByFile(file: File): Image {
-        TODO("Not yet implemented")
-    }
-
-    override fun imageById(id: String): Image {
         TODO("Not yet implemented")
     }
 
