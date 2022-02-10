@@ -7,3 +7,7 @@ import com.icecreamqaq.yuq.message.MessageSource
 
 internal fun <T, R : MessageSource> Message.send(contact: Contact, obj: T, send: (T) -> R): R =
     dodo.internalBot.sendMessage(this, contact, obj, send)
+
+internal fun String.toMessageByDoDoCode(){
+
+}
