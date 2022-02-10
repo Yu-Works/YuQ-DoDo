@@ -4,7 +4,9 @@ import com.IceCreamQAQ.Yu.toJSONObject
 import com.IceCreamQAQ.Yu.toJSONString
 import com.IceCreamQAQ.Yu.toObject
 import com.alibaba.fastjson.JSONObject
+import com.icecreamqaq.yuq.dodo.message.ImageRecv
 import com.icecreamqaq.yuq.dodo.message.TextImpl
+import com.icecreamqaq.yuq.dodo.message.VideoRecv
 import com.icecreamqaq.yuq.message.Message
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -14,6 +16,7 @@ import java.security.KeyFactory
 import java.security.interfaces.RSAPublicKey
 import java.security.spec.X509EncodedKeySpec
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.crypto.Cipher
 
 class OpDoDo(
@@ -54,7 +57,10 @@ class OpDoDo(
     private fun String.rsaEncode() = rsa.encryptByPublic(this.toByteArray())
 
 
-    private val web = OkHttpClient.Builder().build()
+    private val web = OkHttpClient
+        .Builder()
+        .pingInterval(10,TimeUnit.SECONDS)
+        .build()
 
     private fun postV1(path: String, data: Any? = null): JSONObject {
         val sd = data?.toJSONString()
@@ -63,7 +69,7 @@ class OpDoDo(
             Request
                 .Builder()
                 .url("https://botopen.imdodo.com/api/v1/$path")
-                .post((sd ?: "").toRequestBody("application/json".toMediaType()))
+                .post((sd ?: "{}").toRequestBody("application/json".toMediaType()))
                 .header("clientId", clientId)
                 .header("Authorization", token)
                 .header("timestamp", time)
@@ -142,22 +148,20 @@ class OpDoDo(
 
     data class ImageMessageBody(
         val url: String,
-        val width: Int?,
-        val height: Int?,
-        val isOriginal: Int?
+        val width: Int? = null,
+        val height: Int? = null,
+        val isOriginal: Int? = null
     ) : IMessageBody {
-        override fun toMessage() = TODO()
+        override fun toMessage() = ImageRecv(url).toMessage()
     }
 
     data class VideoMessageBody(
         val url: String,
-        val coverUrl: String?,
-        val duration: Long?,
-        val size: Long?
+        val coverUrl: String? = null,
+        val duration: Long? = null,
+        val size: Long? = null
     ) : IMessageBody {
-        override fun toMessage(): Message {
-            TODO("Not yet implemented")
-        }
+        override fun toMessage() = VideoRecv(url,coverUrl).toMessage()
     }
 
     data class SendMessageReq(
