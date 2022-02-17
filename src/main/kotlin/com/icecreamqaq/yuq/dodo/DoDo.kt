@@ -29,12 +29,6 @@ class DoDo : YuQVersion, ApplicationService, YuQ, User {
     @Config("YuQ.DoDo.token")
     lateinit var token: String
 
-    @Config("YuQ.DoDo.publicKey")
-    lateinit var publicKey: String
-
-    @Config("YuQ.DoDo.clientSecret")
-    lateinit var clientSecret: String
-
     lateinit var op: OpDoDo
 
     @Inject
@@ -54,7 +48,7 @@ class DoDo : YuQVersion, ApplicationService, YuQ, User {
 
 
     override fun init() {
-        op = OpDoDo(clientId, token, publicKey, clientSecret)
+        op = OpDoDo(clientId, token)
 
         dodo = this
         opDoDo = op

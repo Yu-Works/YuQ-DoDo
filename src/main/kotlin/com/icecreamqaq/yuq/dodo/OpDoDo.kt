@@ -22,40 +22,7 @@ import javax.crypto.Cipher
 class OpDoDo(
     private val clientId: String,
     private val token: String,
-    private val publicKey: String,
-    private val clientSecret: String,
 ) {
-
-    private inner class RsaUtil {
-
-        private val publicKey: RSAPublicKey
-
-        init {
-            val keyFactory = KeyFactory.getInstance("RSA")
-
-            publicKey = keyFactory.generatePublic(
-                X509EncodedKeySpec(
-                    Base64.getDecoder().decode(this@OpDoDo.publicKey)
-                )
-            ) as RSAPublicKey
-        }
-
-        fun encryptByPublic(content: ByteArray): String {
-            try {
-                val cipher = Cipher.getInstance("RSA")
-                cipher.init(Cipher.ENCRYPT_MODE, publicKey)
-                return Base64.getEncoder().encodeToString(cipher.doFinal(content))
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            return ""
-        }
-
-    }
-
-    private val rsa = RsaUtil()
-    private fun String.rsaEncode() = rsa.encryptByPublic(this.toByteArray())
-
 
     private val web = OkHttpClient
         .Builder()
@@ -70,10 +37,7 @@ class OpDoDo(
                 .Builder()
                 .url("https://botopen.imdodo.com/api/v1/$path")
                 .post((sd ?: "{}").toRequestBody("application/json".toMediaType()))
-                .header("clientId", clientId)
-                .header("Authorization", token)
-                .header("timestamp", time)
-                .header("sign", "$time$clientSecret".rsaEncode())
+                .header("Authorization", "Bot $clientId.$token")
                 .build()
         ).execute().body!!.string().toJSONObject()
         val code = resp.getIntValue("status")
